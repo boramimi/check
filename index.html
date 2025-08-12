@@ -13,59 +13,61 @@
             font-family: 'Gowun Dodum', sans-serif;
             background-color: #f0f9ff;
         }
-        .card {
+        .task-card {
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
         }
-        .card:hover {
+        .task-card:hover {
             transform: translateY(-5px);
         }
-        /* 모든 학생 완료 시 카드 스타일 */
-        .card.all-completed {
-            background-color: #ecfdf5; /* 연한 민트색 */
-            border: 2px solid #34d399;
-        }
-        .card.all-completed h3 {
-            color: #065f46; /* 진한 녹색 */
-        }
-        .custom-checkbox {
-            width: 32px;
-            height: 32px;
-            border: 2px solid #cbd5e1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-        .custom-checkbox.checked {
-            background-color: #34d399;
+        .task-card.all-completed {
             border-color: #10b981;
         }
-        .custom-checkbox.checked svg {
-            display: block;
+        .task-card.all-completed .task-title {
+            color: #047857;
         }
-        .remove-btn {
+        .student-button {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .student-button:hover {
+            transform: scale(1.05);
+        }
+        .student-button.uncompleted {
+            background-color: #f8fafc;
+            color: #475569;
+        }
+        .student-button.completed {
+            background-color: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+        .remove-btn, .history-btn {
             background: none;
             border: none;
-            font-size: 1.5rem;
-            line-height: 1;
-            color: #9ca3af;
             cursor: pointer;
             transition: color 0.2s;
         }
+        .remove-btn {
+            font-size: 1.5rem;
+            line-height: 1;
+            color: #9ca3af;
+        }
         .remove-btn:hover {
             color: #ef4444;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8">
     <div class="max-w-7xl mx-auto">
         <!-- 앱 제목 -->
-        <header class="text-center mb-8">
+        <header class="text-center mb-4">
             <h1 class="text-4xl sm:text-5xl font-bold text-sky-600">🌟 칭찬 쑥쑥! 오늘의 할 일 🌟</h1>
-            <p class="text-lg text-gray-600 mt-2">과제별로 완료한 학생을 체크해주세요!</p>
+            <p class="text-lg text-gray-600 mt-2">할 일을 마치면, 과제 카드 안에서 자기 번호 카드를 눌러주세요!</p>
         </header>
 
         <!-- 날짜 네비게이션 -->
@@ -79,281 +81,250 @@
         <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">👩‍🏫 선생님 관리 패널</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 할 일 추가 -->
                 <div>
                     <label for="new-task-input" class="block text-sm font-medium text-gray-700 mb-1">새로운 할 일 추가하기</label>
-                    <div class="flex">
-                        <input type="text" id="new-task-input" placeholder="예: 책상 정리하기" class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                        <button id="add-task-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded-r-lg transition-colors">추가</button>
-                    </div>
+                    <div class="flex"><input type="text" id="new-task-input" placeholder="예: 책상 정리하기" class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"><button id="add-task-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded-r-lg transition-colors">추가</button></div>
                 </div>
-                <!-- 학생 추가 -->
                 <div>
                     <label for="new-student-input" class="block text-sm font-medium text-gray-700 mb-1">학생 번호 추가하기</label>
-                    <div class="flex">
-                        <input type="text" id="new-student-input" placeholder="예: 13번" class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none">
-                        <button id="add-student-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-r-lg transition-colors">추가</button>
-                    </div>
+                    <div class="flex"><input type="text" id="new-student-input" placeholder="예: 13번" class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"><button id="add-student-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded-r-lg transition-colors">추가</button></div>
                 </div>
             </div>
-             <div class="mt-4 text-right">
-                <button id="reset-today-btn" class="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 rounded-lg transition-colors">현재 날짜 기록 초기화</button>
+            <div class="mt-4 flex flex-col sm:flex-row justify-end gap-2">
+                 <button id="history-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold px-6 py-2 rounded-lg transition-colors">기록 목록</button>
             </div>
         </div>
 
         <!-- 할 일별 체크리스트 영역 -->
-        <main id="main-content" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            <!-- 자바스크립트로 할 일 카드가 생성됩니다. -->
-        </main>
-        
-        <!-- 할 일이 없을 때 표시될 메시지 -->
-        <div id="empty-tasks-msg" class="hidden text-center py-12 bg-white rounded-2xl shadow-md">
-            <p class="text-xl text-gray-500">먼저 '새로운 할 일'을 추가해주세요! 📝</p>
+        <main id="main-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></main>
+        <div id="empty-tasks-msg" class="hidden text-center py-12 bg-white rounded-2xl shadow-md"><p class="text-xl text-gray-500">먼저 '새로운 할 일'을 추가해주세요! 📝</p></div>
+    </div>
+
+    <!-- 기록 목록 모달 -->
+    <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-11/12 max-w-md">
+            <h3 class="text-2xl font-bold mb-4">저장된 기록 목록</h3>
+            <div id="history-list-container" class="max-h-96 overflow-y-auto space-y-2 pr-2"></div>
+            <div class="text-right mt-6">
+                <button id="close-history-modal-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">닫기</button>
+            </div>
         </div>
     </div>
 
     <script>
         // DOM 요소
-        const taskInput = document.getElementById('new-task-input');
-        const addTaskBtn = document.getElementById('add-task-btn');
-        const studentInput = document.getElementById('new-student-input');
-        const addStudentBtn = document.getElementById('add-student-btn');
-        const resetTodayBtn = document.getElementById('reset-today-btn');
+        const taskInput = document.getElementById('new-task-input'), addTaskBtn = document.getElementById('add-task-btn');
+        const studentInput = document.getElementById('new-student-input'), addStudentBtn = document.getElementById('add-student-btn');
         const checklistContainer = document.getElementById('main-content');
-        const emptyTasksMsg = document.getElementById('empty-tasks-msg');
-        const prevDayBtn = document.getElementById('prev-day-btn');
-        const nextDayBtn = document.getElementById('next-day-btn');
-        const dateDisplay = document.getElementById('date-display');
+        const emptyTasksMsg = document.getElementById('empty-tasks-msg'), prevDayBtn = document.getElementById('prev-day-btn');
+        const nextDayBtn = document.getElementById('next-day-btn'), dateDisplay = document.getElementById('date-display');
+        const historyBtn = document.getElementById('history-btn'), historyModal = document.getElementById('history-modal');
+        const historyListContainer = document.getElementById('history-list-container'), closeHistoryModalBtn = document.getElementById('close-history-modal-btn');
 
         // 앱 상태
         let currentDate = new Date();
-        let state = {
-            tasks: [],
-            students: [],
-            completion: {}
-        };
+        let state = { students: [], tasks: [], completion: {} };
 
         // 스토리지 키
-        const STUDENT_STORAGE_KEY = 'kidsChecklist_students';
-        const DAILY_STORAGE_PREFIX = 'kidsChecklist_daily_v6_';
+        const STUDENT_STORAGE_KEY = 'kidsChecklist_card_students_v1';
+        const DAILY_STORAGE_PREFIX = 'kidsChecklist_card_daily_v1_';
+
+        // 파스텔톤 색상 목록
+        const pastelColors = ['#ffd6d6', '#d6eaff', '#d6ffd6', '#fff5d6', '#f0d6ff', '#d6f5ff', '#ffefd6'];
 
         // 초기 학생 번호
         const initialStudents = [
             '1번', '2번', '3번', '4번', '5번', '6번', '7번', '8번', '9번', '10번', '11번', '12번',
             '31번', '32번', '33번', '34번', '35번', '36번', '37번', '38번', '39번', '40번', '41번', '42번'
-        ];
+        ].map((name, index) => ({ id: `student-${index}`, name }));
 
         // --- 날짜 관련 함수 ---
-        function formatDate(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
+        function formatDate(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
         function updateDateDisplay() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            currentDate.setHours(0, 0, 0, 0);
-
+            const today = new Date(); today.setHours(0, 0, 0, 0); currentDate.setHours(0, 0, 0, 0);
             let displayText = `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일`;
-            if (currentDate.getTime() === today.getTime()) {
-                displayText += " (오늘)";
-            }
+            if (currentDate.getTime() === today.getTime()) { displayText += " (오늘)"; }
             dateDisplay.textContent = displayText;
         }
-
-        function changeDate(days) {
-            currentDate.setDate(currentDate.getDate() + days);
-            loadStateForDate(currentDate);
-            render();
-        }
-
-        function goToToday() {
-            currentDate = new Date();
-            loadStateForDate(currentDate);
-            render();
-        }
+        function changeDate(days) { currentDate.setDate(currentDate.getDate() + days); loadStateForDate(currentDate); render(); }
+        function goToToday() { currentDate = new Date(); loadStateForDate(currentDate); render(); }
 
         // --- 데이터 관리 ---
+        function loadStudents() {
+            let savedStudents = localStorage.getItem(STUDENT_STORAGE_KEY);
+            if (savedStudents) {
+                state.students = JSON.parse(savedStudents);
+            } else {
+                state.students = JSON.parse(JSON.stringify(initialStudents));
+                saveStudents();
+            }
+        }
+
         function loadStateForDate(date) {
             const dateKey = formatDate(date);
-
-            // 학생 목록 불러오기 (영구 저장)
-            const savedStudents = localStorage.getItem(STUDENT_STORAGE_KEY);
-            state.students = savedStudents ? JSON.parse(savedStudents) : initialStudents.map((name, index) => ({ id: `student-${index}`, name }));
-
-            // 해당 날짜의 데이터 불러오기
             const savedDailyData = localStorage.getItem(DAILY_STORAGE_PREFIX + dateKey);
-            if (savedDailyData) {
-                const dailyData = JSON.parse(savedDailyData);
-                state.tasks = dailyData.tasks || [];
-                state.completion = dailyData.completion || {};
-            } else {
-                state.tasks = [];
-                state.completion = {};
-            }
+            const dailyData = savedDailyData ? JSON.parse(savedDailyData) : { tasks: [], completion: {} };
+            state.tasks = dailyData.tasks || [];
+            state.completion = dailyData.completion || {};
             updateDateDisplay();
         }
-
-        function saveStudents() {
-            localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(state.students));
-        }
-
+        function saveStudents() { localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(state.students)); }
         function saveDailyData(date) {
             const dateKey = formatDate(date);
-            const dailyData = {
-                tasks: state.tasks,
-                completion: state.completion
-            };
-            localStorage.setItem(DAILY_STORAGE_PREFIX + dateKey, JSON.stringify(dailyData));
+            localStorage.setItem(DAILY_STORAGE_PREFIX + dateKey, JSON.stringify({ tasks: state.tasks, completion: state.completion }));
         }
 
         // --- 렌더링 ---
-        function render() {
-            renderTaskCards();
-            updateEmptyStateVisibility();
-        }
-
+        function render() { renderTaskCards(); updateEmptyStateVisibility(); }
         function renderTaskCards() {
             checklistContainer.innerHTML = '';
             state.tasks.forEach(task => {
                 const allCompleted = state.students.length > 0 && state.students.every(student => state.completion[`${student.id}-${task.id}`]);
-
-                const taskCard = document.createElement('div');
-                taskCard.className = `bg-white rounded-2xl p-4 flex flex-col gap-3 card ${allCompleted ? 'all-completed' : ''}`;
                 
-                const taskHeader = document.createElement('div');
-                taskHeader.className = 'w-full flex justify-between items-center pb-2 border-b';
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card rounded-2xl p-6 flex flex-col gap-4 ${allCompleted ? 'all-completed' : ''}`;
+                taskCard.style.backgroundColor = task.color;
                 
                 const headerText = allCompleted ? `🎉 ${task.text} (모두 완료!)` : task.text;
-
-                taskHeader.innerHTML = `<h3 class="text-xl font-bold text-gray-800">${headerText}</h3><button data-task-id="${task.id}" class="remove-btn remove-task-btn">&times;</button>`;
-                taskCard.appendChild(taskHeader);
-
-                const studentList = document.createElement('div');
-                studentList.className = 'space-y-2';
+                taskCard.innerHTML = `
+                    <div class="w-full flex justify-between items-center pb-3 border-b border-gray-500/20">
+                        <h3 class="task-title text-2xl font-bold text-gray-800">${headerText}</h3>
+                        <button data-task-id="${task.id}" class="remove-btn remove-task-btn">&times;</button>
+                    </div>
+                `;
                 
+                const studentGrid = document.createElement('div');
+                studentGrid.className = 'grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3';
+
                 if (state.students.length > 0) {
                     state.students.forEach(student => {
                         const checkId = `${student.id}-${task.id}`;
                         const isChecked = state.completion[checkId];
-                        
-                        const checkItem = document.createElement('div');
-                        checkItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-lg';
-                        
-                        checkItem.innerHTML = `
-                            <span class="text-gray-700 flex-grow mr-2">${student.name}</span>
-                            <div class="custom-checkbox rounded-md ${isChecked ? 'checked' : ''}" data-check-id="${checkId}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            </div>
-                        `;
-                        studentList.appendChild(checkItem);
+                        const studentButton = document.createElement('button');
+                        studentButton.className = `student-button p-2 rounded-lg text-lg font-bold aspect-square flex items-center justify-center ${isChecked ? 'completed' : 'uncompleted'}`;
+                        studentButton.dataset.checkId = checkId;
+                        studentButton.textContent = student.name.replace('번', '');
+                        studentGrid.appendChild(studentButton);
                     });
                 } else {
-                    studentList.innerHTML = `<p class="text-center text-gray-500 py-4">학생을 추가해주세요.</p>`;
+                    studentGrid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-4">학생을 추가해주세요.</p>`;
                 }
                 
-                taskCard.appendChild(studentList);
+                taskCard.appendChild(studentGrid);
                 checklistContainer.appendChild(taskCard);
             });
         }
-        
         function updateEmptyStateVisibility() {
-             if (state.tasks.length === 0) {
-                emptyTasksMsg.classList.remove('hidden');
-                checklistContainer.classList.add('hidden');
-            } else {
-                emptyTasksMsg.classList.add('hidden');
-                checklistContainer.classList.remove('hidden');
-            }
+            const showEmpty = state.tasks.length === 0;
+            emptyTasksMsg.classList.toggle('hidden', !showEmpty);
+            checklistContainer.classList.toggle('hidden', showEmpty);
         }
+
+        // --- 모달 관련 함수 ---
+        function openHistoryModal() {
+            historyListContainer.innerHTML = '';
+            let dates = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(DAILY_STORAGE_PREFIX)) {
+                    dates.push(key.replace(DAILY_STORAGE_PREFIX, ''));
+                }
+            }
+            dates.sort().reverse(); // 최신 날짜부터 정렬
+
+            if (dates.length === 0) {
+                historyListContainer.innerHTML = `<p class="text-center text-gray-500">저장된 기록이 없습니다.</p>`;
+            } else {
+                dates.forEach(dateStr => {
+                    const [year, month, day] = dateStr.split('-');
+                    const dateButton = document.createElement('button');
+                    dateButton.className = 'w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors';
+                    dateButton.textContent = `${year}년 ${parseInt(month)}월 ${parseInt(day)}일`;
+                    dateButton.dataset.date = dateStr;
+                    historyListContainer.appendChild(dateButton);
+                });
+            }
+            historyModal.classList.remove('hidden');
+        }
+        function closeHistoryModal() { historyModal.classList.add('hidden'); }
 
         // --- 이벤트 핸들러 ---
         function handleAddTask() {
             const taskText = taskInput.value.trim();
             if (taskText) {
-                state.tasks.push({ id: `task-${Date.now()}`, text: taskText });
+                const color = pastelColors[state.tasks.length % pastelColors.length];
+                state.tasks.push({ id: `task-${Date.now()}`, text: taskText, color });
                 taskInput.value = '';
                 saveDailyData(currentDate);
                 render();
             }
         }
-
         function handleAddStudent() {
             const studentName = studentInput.value.trim();
             if (studentName) {
                 state.students.push({ id: `student-${Date.now()}`, name: studentName });
-                studentInput.value = '';
                 saveStudents();
                 render();
             }
         }
-
-        function handleResetToday() {
-            if (confirm(`정말로 ${formatDate(currentDate)} 날짜의 기록을 모두 초기화하시겠습니까? 추가한 할 일과 체크 현황이 모두 사라집니다.`)) {
-                state.tasks = [];
-                state.completion = {};
-                saveDailyData(currentDate);
-                render();
-            }
-        }
-
-        function handleCheckboxClick(e) {
-            const checkbox = e.target.closest('.custom-checkbox');
-            if (!checkbox) return;
-
-            const checkId = checkbox.dataset.checkId;
+        
+        function handleStudentButtonClick(e) {
+            const studentButton = e.target.closest('.student-button');
+            if (!studentButton) return;
+            const checkId = studentButton.dataset.checkId;
             state.completion[checkId] = !state.completion[checkId];
-            
             saveDailyData(currentDate);
             render();
         }
-
         function handleRemoveTask(e) {
             const removeButton = e.target.closest('.remove-task-btn');
             if (!removeButton) return;
-            
             const taskId = removeButton.dataset.taskId;
-            if (confirm('이 할 일을 목록에서 삭제하시겠습니까? 모든 학생의 체크 기록도 함께 사라집니다.')) {
+            if (confirm('이 할 일을 목록에서 삭제하시겠습니까?')) {
                 state.tasks = state.tasks.filter(task => task.id !== taskId);
-                Object.keys(state.completion).forEach(key => {
-                    if (key.endsWith(`-${taskId}`)) {
-                        delete state.completion[key];
-                    }
-                });
+                Object.keys(state.completion).forEach(key => key.endsWith(`-${taskId}`) && delete state.completion[key]);
                 saveDailyData(currentDate);
                 render();
             }
+        }
+        function handleHistoryDateClick(e) {
+            const dateButton = e.target.closest('[data-date]');
+            if (!dateButton) return;
+            const [year, month, day] = dateButton.dataset.date.split('-').map(Number);
+            currentDate = new Date(year, month - 1, day);
+            loadStateForDate(currentDate);
+            render();
+            closeHistoryModal();
         }
 
         // --- 이벤트 리스너 등록 ---
         function addEventListeners() {
             addTaskBtn.addEventListener('click', handleAddTask);
-            taskInput.addEventListener('keypress', e => e.key === 'Enter' && handleAddTask());
             addStudentBtn.addEventListener('click', handleAddStudent);
+            taskInput.addEventListener('keypress', e => e.key === 'Enter' && handleAddTask());
             studentInput.addEventListener('keypress', e => e.key === 'Enter' && handleAddStudent());
-            
-            resetTodayBtn.addEventListener('click', handleResetToday);
             prevDayBtn.addEventListener('click', () => changeDate(-1));
             nextDayBtn.addEventListener('click', () => changeDate(1));
             dateDisplay.addEventListener('click', goToToday);
+            historyBtn.addEventListener('click', openHistoryModal);
+            closeHistoryModalBtn.addEventListener('click', closeHistoryModal);
+            historyListContainer.addEventListener('click', handleHistoryDateClick);
 
             document.body.addEventListener('click', e => {
-                handleCheckboxClick(e);
+                handleStudentButtonClick(e);
                 handleRemoveTask(e);
             });
         }
 
         // --- 앱 초기화 ---
         function init() {
+            loadStudents();
             loadStateForDate(currentDate);
             render();
             addEventListeners();
         }
-
+        
         init();
     </script>
 </body>
 </html>
-
